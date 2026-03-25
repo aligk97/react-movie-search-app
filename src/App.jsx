@@ -1,13 +1,14 @@
-import { useState } from 'react'
-import SearchBar from './components/SearchBar'
-import MovieList from './components/MovieList'
+import { useState } from "react";
+import SearchBar from "./components/SearchBar";
+import MovieList from "./components/MovieList";
 
-import './App.css'
+import "./App.css";
 
 function App() {
-
-  const [searchTerm, setSearchTerm] = useState('')
-  const [movies, setMovies] = useState([])
+  const [searchTerm, setSearchTerm] = useState("");
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   // const movies = [
   //     {
   //     imdbID: "1",
@@ -28,34 +29,56 @@ function App() {
   //     Poster: "https://placehold.co/300x450?text=The+Dark+Knight",
   //   },
   // ]
-  
 
+  const filteredMovies = movies.filter((movie) =>
+    movie.Title.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
-  const filteredMovies = movies.filter(movie => movie.Title.toLowerCase().includes(searchTerm.toLowerCase()))
+  async function handleSearch() {
+    if (searchTerm.trim() === "") return;
+    setLoading(true);
+    setError(null);
 
+    try {
+      const response = await fetch(
+        `http://www.omdbapi.com/?apikey=${import.meta.env.VITE_OMDB_API_KEY}&s=${searchTerm}`,
+      );
+      const data = await response.json();
+      if (data.Response === "True") {
+        setMovies(data.Search);
+      } else {
+        console.error("Error fetching movies:", data.Error);
+        setMovies([]);
+        setError(data.Error);
+      }
+    } catch (error) {
+      setMovies([]);
+      setError("Failed to fetch movies.");
 
-
-  async function handleSearch(){
-    if(searchTerm.trim() === '') return
-     const response = await fetch(`http://www.omdbapi.com/?apikey=${import.meta.env.VITE_OMDB_API_KEY}&s=${searchTerm}`)
-    const data = await response.json()
-    if(data.Response === "True"){
-      setMovies(data.Search)
-    } else {
-      console.error("Error fetching movies:", data.Error)
-      setMovies([])
+      console.error("Network error:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <div className='app'>
-      <h1 className='title'>Movie Search App</h1>
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} onSearch={handleSearch}></SearchBar>
-      <MovieList movies = {filteredMovies}></MovieList>
-
+    <div className="app">
+      <h1 className="title">Movie Search App</h1>
+      <SearchBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onSearch={handleSearch}
+      ></SearchBar>
+      {error && <p className="error">{error}</p>}
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div>
+          <MovieList movies={filteredMovies}></MovieList>{" "}
+        </div>
+      )}
     </div>
- 
-  )
+  );
 }
 
-export default App
+export default App;
