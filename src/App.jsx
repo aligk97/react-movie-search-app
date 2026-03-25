@@ -52,7 +52,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://www.omdbapi.com/?apikey=${import.meta.env.VITE_OMDB_API_KEY}&s=${searchTerm}`,
+        `https://www.omdbapi.com/?apikey=${import.meta.env.VITE_OMDB_API_KEY}&s=${searchTerm}`,
       );
       const data = await response.json();
       if (data.Response === "True") {
