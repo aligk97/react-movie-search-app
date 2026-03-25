@@ -1,15 +1,22 @@
 import React from 'react'
 
-function SearchBar({ searchTerm, setSearchTerm, onSearch }) {
+function SearchBar({ searchTerm, setSearchTerm, onSearch, loading  }) {
   return (
     <div className='search-bar'>
       <input 
         type="text" 
         placeholder='Search for movies...' 
         value={searchTerm}
+        disabled={loading}
         onChange={(e) => setSearchTerm(e.target.value)}
-      ></input>
-      <button onClick={onSearch}>Search</button>
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onSearch()
+          }
+        }}></input>
+      <button disabled={loading || searchTerm.trim() === ""} onClick={onSearch}>
+        {loading ? 'Searching...' : 'Search'}
+      </button>
     </div>
   )
 }

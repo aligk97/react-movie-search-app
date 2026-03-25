@@ -1,6 +1,8 @@
 import { useState } from "react";
 import SearchBar from "./components/SearchBar";
 import MovieList from "./components/MovieList";
+import MovieModal from "./components/MovieModal";
+
 
 import "./App.css";
 
@@ -9,6 +11,7 @@ function App() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
   // const movies = [
   //     {
   //     imdbID: "1",
@@ -33,6 +36,14 @@ function App() {
   const filteredMovies = movies.filter((movie) =>
     movie.Title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+   function handleSelectMovie(movie) {
+    setSelectedMovie(movie);
+  }
+
+  function handleCloseModal() {
+    setSelectedMovie(null);
+  }
 
   async function handleSearch() {
     if (searchTerm.trim() === "") return;
@@ -68,14 +79,28 @@ function App() {
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         onSearch={handleSearch}
+        loading={loading}
       ></SearchBar>
+
       {error && <p className="error">{error}</p>}
+
       {loading ? (
         <p>Loading...</p>
       ) : (
         <div>
-          <MovieList movies={filteredMovies}></MovieList>{" "}
+          <MovieList
+            movies={filteredMovies}
+            handleSelectMovie={handleSelectMovie}
+          ></MovieList>
         </div>
+      )}
+
+      {!loading && movies.length === 0 && !error && (
+        <p className="no-results">Try searching for something else.</p>
+      )}
+
+      {selectedMovie && (
+        <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
       )}
     </div>
   );
